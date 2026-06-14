@@ -10,6 +10,13 @@ from secops_cli.main import print_logo, show_main_menu
 from secops_cli.secopsctl import cmd_init, cmd_validate, cmd_deploy, DEMO_YAML
 
 
+def _write_temp_yaml(data, suffix=".yaml"):
+    fd, path = tempfile.mkstemp(suffix=suffix)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        yaml.dump(data, f)
+    return path
+
+
 class TestMain(unittest.TestCase):
     def test_print_logo(self):
         print_logo()
@@ -22,72 +29,63 @@ class TestSecopsctl(unittest.TestCase):
     def test_cmd_init_demo(self):
         class Args:
             demo = True
-
         cmd_init(Args())
 
     def test_cmd_init_default(self):
         class Args:
             demo = False
-
         cmd_init(Args())
 
     def test_cmd_validate_valid(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump({"tenant_name": "test", "environment": "dev"}, f)
-            f.flush()
-
+        path = _write_temp_yaml({"tenant_name": "test", "environment": "dev"})
+        try:
             class Args:
-                file = f.name
-
+                file = path
             cmd_validate(Args())
-            os.unlink(f.name)
+        finally:
+            os.unlink(path)
 
     def test_cmd_validate_missing_tenant(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump({"environment": "dev"}, f)
-            f.flush()
-
+        path = _write_temp_yaml({"environment": "dev"})
+        try:
             class Args:
-                file = f.name
-
+                file = path
             with self.assertRaises(SystemExit):
                 cmd_validate(Args())
-            os.unlink(f.name)
+        finally:
+            os.unlink(path)
 
     def test_cmd_validate_file_not_found(self):
         class Args:
             file = "/nonexistent/file.yaml"
-
         with self.assertRaises(SystemExit):
             cmd_validate(Args())
 
     def test_cmd_validate_invalid_yaml(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        fd, path = tempfile.mkstemp(suffix=".yaml")
+        with os.fdopen(fd, "w") as f:
             f.write("{{{{invalid yaml")
-            f.flush()
-
+        try:
             class Args:
-                file = f.name
-
+                file = path
             with self.assertRaises(SystemExit):
                 cmd_validate(Args())
-            os.unlink(f.name)
+        finally:
+            os.unlink(path)
 
     def test_cmd_deploy(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump({
-                "tenant_name": "test",
-                "environment": "dev",
-                "defense": {"firewall": {"enabled": True}},
-                "offense": {"auto_scan": {"enabled": True}},
-            }, f)
-            f.flush()
-
+        path = _write_temp_yaml({
+            "tenant_name": "test",
+            "environment": "dev",
+            "defense": {"firewall": {"enabled": True}},
+            "offense": {"auto_scan": {"enabled": True}},
+        })
+        try:
             class Args:
-                file = f.name
-
+                file = path
             cmd_deploy(Args())
-            os.unlink(f.name)
+        finally:
+            os.unlink(path)
 
     def test_demo_yaml_is_valid(self):
         config = yaml.safe_load(DEMO_YAML)
