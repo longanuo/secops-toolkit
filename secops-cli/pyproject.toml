@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secops-cli"
-version = "2.0.0"
+version = "3.0.0"
 description = "SecOps 统一命令行入口 - 渗透测试 + 系统维护"
 requires-python = ">=3.8"
 dependencies = [

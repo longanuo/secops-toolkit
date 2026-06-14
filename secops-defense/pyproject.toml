@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secops-defense"
-version = "2.0.0"
+version = "3.0.0"
 description = "SecOps 系统维护子项目 - 安全体检/加固/防火墙/威胁情报"
 requires-python = ">=3.8"
 dependencies = [
