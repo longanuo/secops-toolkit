@@ -1,0 +1,40 @@
+请根据以下漏洞描述，计算 CVSS 3.1 Base Score 并给出完整向量字符串。
+
+<vulnerability_description>
+{{vulnerability_description}}
+</vulnerability_description>
+
+## 输出格式
+
+### 向量逐项分析
+
+| 指标 | 选项 | 选择值 | 选择理由 |
+|------|------|------|------|
+| 攻击向量 (AV) | Network/Adjacent/Local/Physical | ? | ... |
+| 攻击复杂度 (AC) | Low/High | ? | ... |
+| 所需权限 (PR) | None/Low/High | ? | ... |
+| 用户交互 (UI) | None/Required | ? | ... |
+| 影响范围 (S) | Unchanged/Changed | ? | ... |
+| 机密性影响 (C) | None/Low/High | ? | ... |
+| 完整性影响 (I) | None/Low/High | ? | ... |
+| 可用性影响 (A) | None/Low/High | ? | ... |
+
+### 计算结果
+
+**CVSS 向量字符串**：CVSS:3.1/AV:X/AC:X/PR:X/UI:X/S:X/C:X/I:X/A:X
+
+**Base Score**：X.X
+
+**等级**：严重 / 高危 / 中危 / 低危
+
+### SRC 平台对应等级参考
+
+| SRC平台 | 对应CVSS区间 | 本漏洞等级 |
+|---|---|---|
+| 阿里云 ASRC | 9.0-10=严重, 7.0-8.9=高危, 4.0-6.9=中危 | ? |
+| 腾讯 TSRC | 同上 | ? |
+| 华为 HSRC | 同上 | ? |
+
+### 评分说明
+
+如果对某个向量的选择有争议，说明理由和可能的替代值（最低分/最高分区间）。

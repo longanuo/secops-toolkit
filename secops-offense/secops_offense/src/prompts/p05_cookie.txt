@@ -1,0 +1,32 @@
+请对以下 HTTP 响应头进行 Cookie 和会话安全审计。
+目标：{{target_domain}}，SRC 授权目标。
+
+<http_headers>
+{{http_headers}}
+</http_headers>
+
+## 审计维度
+
+### 1. Cookie 安全属性检查
+| Cookie 名 | Secure | HttpOnly | SameSite | Path | Domain | 问题 |
+|---|---|---|---|---|---|---|
+
+### 2. 会话管理问题
+- 登录前后 Session ID 是否更换？（会话固定漏洞）
+- Session 过期时间是否合理？
+- 退出登录后 Session 是否立即失效？
+
+### 3. CSRF 风险分析
+- 是否缺少 SameSite=Strict/Lax？
+- 是否有 CSRF Token 机制？
+- 哪些接口最可能存在 CSRF 风险（状态变更类）？
+
+### 4. 信息泄露
+响应头是否暴露了：
+- 服务器版本（Server/X-Powered-By）
+- 内部 IP（X-Forwarded-For/X-Real-IP 的响应值）
+- 调试信息（X-Debug-*、X-Request-Id 泄露规律）
+
+### 5. 发现汇总
+| 漏洞类型 | 严重程度 | CVSS 预估 | 修复建议 |
+|---|---|---|---|

@@ -1,0 +1,42 @@
+name: secops-defense
+version: "2.0"
+description: >
+  SecOps 系统维护子项目技能。覆盖系统安全体检、一键加固、防火墙管理、
+  威胁情报拉取、定时巡检、运维报告生成。
+
+triggers:
+  - "系统体检"
+  - "安全加固"
+  - "防火墙"
+  - "威胁情报"
+  - "服务器安全"
+  - "运维巡检"
+  - "安全报告"
+
+import_path: secops_defense
+
+modules:
+  - name: evaluator
+    description: 系统安全体检
+    usage: |
+      from secops_defense import evaluator
+      data = evaluator.run_evaluation()
+      print(f"安全评分: {data['score']}/100")
+
+  - name: hardener
+    description: 一键安全加固
+    usage: |
+      from secops_defense import hardener
+      hardener.run_hardening()
+
+  - name: firewall
+    description: 防火墙管理
+    usage: |
+      from secops_defense import firewall
+      firewall.update_threat_intel_firewall()
+
+  - name: cron
+    description: 定时巡检
+    usage: |
+      from secops_defense import cron
+      cron.run_cron_check()

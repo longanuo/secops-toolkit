@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecOps Visual Lab</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- 侧边栏 -->
+  <nav id="sidebar">
+    <div class="logo">
+      <span class="icon">⚡</span>
+      <span>SecOps Lab</span>
+    </div>
+    <ul class="nav">
+      <li class="active" data-page="dashboard"><span>📊</span> 仪表盘</li>
+      <li data-page="attack"><span>🎯</span> 漏洞验证</li>
+      <li data-page="arsenal"><span>💣</span> 弹药库</li>
+      <li data-page="learn"><span>📖</span> CTF 学习</li>
+      <li data-page="report"><span>📋</span> 报告</li>
+    </ul>
+    <div class="sidebar-footer">
+      <div id="arsenal-count">弹药: <span>加载中...</span></div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main id="content">
+    <!-- 仪表盘 -->
+    <div id="page-dashboard" class="page active">
+      <h1>🎯 SecOps 漏洞自动验证平台</h1>
+      <p class="subtitle">基于 GitHub 攻防仓库实时学习 · CTF 实战训练工具</p>
+
+      <div class="quick-start">
+        <h2>快速开始</h2>
+        <div class="input-group">
+          <input type="text" id="target-url" placeholder="输入目标 URL (如 https://example.com)" />
+          <button id="btn-quick-attack" class="btn btn-danger">开始扫描</button>
+        </div>
+        <div class="checkbox-group">
+          <label><input type="checkbox" value="xss" checked> XSS</label>
+          <label><input type="checkbox" value="sqli" checked> SQLi</label>
+          <label><input type="checkbox" value="ssti" checked> SSTI</label>
+          <label><input type="checkbox" value="lfi" checked> LFI</label>
+          <label><input type="checkbox" value="infoleak" checked> 信息泄露</label>
+          <label><input type="checkbox" id="cb-timebased"> 时间盲注 (慢)</label>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card" onclick="switchPage('attack')">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">漏洞验证</div>
+          <div class="card-desc">对目标 URL 进行系统性漏洞扫描</div>
+        </div>
+        <div class="card" onclick="switchPage('arsenal')">
+          <div class="card-icon">💣</div>
+          <div class="card-title">弹药库</div>
+          <div class="card-desc">从 GitHub 学习最新攻击手法</div>
+        </div>
+        <div class="card" onclick="switchPage('learn')">
+          <div class="card-icon">📖</div>
+          <div class="card-title">CTF 学习</div>
+          <div class="card-desc">各类漏洞的攻击方法与 CTF 技巧</div>
+        </div>
+        <div class="card" onclick="switchPage('report')">
+          <div class="card-icon">📋</div>
+          <div class="card-title">报告中心</div>
+          <div class="card-desc">查看历史扫描报告</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 漏洞验证页 -->
+    <div id="page-attack" class="page">
+      <h1>🎯 漏洞自动验证</h1>
+      <div class="attack-panel">
+        <div class="target-input">
+          <input type="text" id="attack-target" placeholder="目标 URL" />
+          <button id="btn-start-attack" class="btn btn-danger">⚡ 开始攻击</button>
+        </div>
+
+        <!-- 进度 -->
+        <div id="scan-progress" class="progress-panel" style="display:none">
+          <h3>扫描进度</h3>
+          <div id="progress-steps"></div>
+        </div>
+
+        <!-- 结果 -->
+        <div id="scan-results" class="results-panel" style="display:none">
+          <h3>扫描结果</h3>
+          <div id="results-summary"></div>
+          <div id="results-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹药库页 -->
+    <div id="page-arsenal" class="page">
+      <h1>💣 弹药库管理</h1>
+      <div class="arsenal-panel">
+        <button id="btn-learn" class="btn btn-primary">🔄 从 GitHub 学习 (全量)</button>
+        <button id="btn-refresh-arsenal" class="btn">刷新</button>
+        <div id="arsenal-table"></div>
+      </div>
+    </div>
+
+    <!-- CTF 学习页 -->
+    <div id="page-learn" class="page">
+      <h1>📖 CTF 漏洞学习指南</h1>
+      <div class="learn-grid">
+        <div class="learn-card" data-type="xss">
+          <div class="severity high">HIGH</div>
+          <h3>XSS 跨站脚本</h3>
+          <p>注入恶意脚本到网页</p>
+        </div>
+        <div class="learn-card" data-type="sqli">
+          <div class="severity critical">CRITICAL</div>
+          <h3>SQL 注入</h3>
+          <p>操纵数据库查询</p>
+        </div>
+        <div class="learn-card" data-type="ssti">
+          <div class="severity critical">CRITICAL</div>
+          <h3>模板注入 SSTI</h3>
+          <p>服务端模板代码执行</p>
+        </div>
+        <div class="learn-card" data-type="ssrf">
+          <div class="severity high">HIGH</div>
+          <h3>SSRF 请求伪造</h3>
+          <p>让服务器访问内部资源</p>
+        </div>
+        <div class="learn-card" data-type="lfi">
+          <div class="severity critical">CRITICAL</div>
+          <h3>文件包含 LFI</h3>
+          <p>读取服务器任意文件</p>
+        </div>
+        <div class="learn-card" data-type="xxe">
+          <div class="severity critical">CRITICAL</div>
+          <h3>XXE 外部实体</h3>
+          <p>XML 注入读文件/RCE</p>
+        </div>
+        <div class="learn-card" data-type="cmdi">
+          <div class="severity critical">CRITICAL</div>
+          <h3>命令注入</h3>
+          <p>执行系统命令</p>
+        </div>
+      </div>
+      <!-- 学习详情弹窗 -->
+      <div id="learn-detail" class="detail-panel" style="display:none">
+        <button class="close-btn" onclick="document.getElementById('learn-detail').style.display='none'">✕</button>
+        <div id="learn-content"></div>
+      </div>
+    </div>
+
+    <!-- 报告页 -->
+    <div id="page-report" class="page">
+      <h1>📋 扫描报告</h1>
+      <div id="report-list">
+        <p class="empty">暂无报告，请先执行扫描</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

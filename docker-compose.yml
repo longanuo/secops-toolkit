@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  secops:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secops-toolbox
+    volumes:
+      - secops-reports:/app/reports
+      - secops-cache:/root/.secops
+    environment:
+      - SECOPS_WEBHOOK_URL=${SECOPS_WEBHOOK_URL:-}
+    networks:
+      - secops-net
+    restart: unless-stopped
+
+  # [警告] 可选：靶机服务 (用于本地测试，生产环境绝对不要依赖或启动此服务)
+  # target-web:
+  #   image: vulnerables/web-dvwa:latest
+  #   container_name: dvwa-target
+  #   ports:
+  #     - "8080:80"
+  #   networks:
+  #     - secops-net
+  #   restart: unless-stopped
+
+volumes:
+  secops-reports:
+  secops-cache:
+
+networks:
+  secops-net:
+    driver: bridge

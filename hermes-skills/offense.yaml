@@ -1,0 +1,41 @@
+name: secops-offense
+version: "2.0"
+description: >
+  SecOps 渗透测试子项目技能。覆盖漏洞自动验证（XSS/SQLi/SSTI/LFI/信息泄露）、
+  弹药库管理、GitHub payload 学习、Kali 命令生成、在线扫描。
+  所有操作限定在已授权目标范围内。
+
+triggers:
+  - "扫描漏洞"
+  - "渗透测试"
+  - "攻击测试"
+  - "漏洞验证"
+  - "payload"
+  - "弹药库"
+  - "arsenal"
+  - "XSS检测"
+  - "SQL注入"
+  - "Kali命令"
+
+import_path: secops_offense
+
+modules:
+  - name: attack_engine
+    description: 漏洞自动验证引擎
+    usage: |
+      from secops_offense.attack_engine import AttackEngine, start_attack
+      engine = AttackEngine("https://target.com")
+      if engine.authorize():
+          engine.run_all()
+          engine.report()
+
+  - name: arsenal
+    description: Payload 弹药库
+    usage: |
+      from secops_offense.arsenal import PAYLOADS, generate_variations
+
+  - name: github_offense
+    description: GitHub 攻防仓库自动学习
+    usage: |
+      from secops_offense.github_offense import run_offense_learning
+      run_offense_learning(categories=["XSS", "SQLi"])

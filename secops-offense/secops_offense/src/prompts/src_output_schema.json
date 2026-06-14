@@ -1,0 +1,56 @@
+{
+  "src_task_output": {
+    "task_id": "src-YYYYMMDD-NNN",
+    "stage": "passive_recon | vulnerability_validation | report_generation",
+    "target": "example.com",
+    "timestamp": "ISO8601",
+    "authorized": true,
+    "status": "completed | in_progress | needs_active_testing | out_of_scope",
+
+    "findings": [
+      {
+        "id": "FINDING-001",
+        "type": "hardcoded_secret | idor | unauth_access | missing_security_header | info_disclosure | csrf | session_fixation",
+        "title": "简短描述（SRC报告标题格式）",
+        "location": "URL 或 文件路径",
+        "severity": "critical | high | medium | low | info",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "unverified": false,
+        "evidence": "截图说明 或 关键响应片段",
+        "impact": "影响描述",
+        "reproduction_steps": ["步骤1", "步骤2"],
+        "remediation": "修复建议",
+        "tags": ["js_leak", "wechat_sdk"]
+      }
+    ],
+
+    "asset_priority": [
+      {
+        "domain": "admin.example.com",
+        "priority": "high | medium | low",
+        "reason": "含 admin 路径，无 CDN 遮挡",
+        "recommended_tests": ["unauth_access", "idor"]
+      }
+    ],
+
+    "next_actions": [
+      {
+        "action": "validate_credential",
+        "target": "api.example.com",
+        "method": "GET /api/token/check",
+        "requires_active_testing": true,
+        "priority": 1
+      }
+    ],
+
+    "habit_hints": {
+      "preferred_tools": ["curl", "python-requests"],
+      "workflow_pattern": "js_analysis → sourcemap_check → credential_assessment",
+      "vuln_types_found": ["hardcoded_secret", "missing_csp"],
+      "time_spent_min": 25
+    },
+
+    "error": null
+  }
+}

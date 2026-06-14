@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecOps 服务器安全评估与加固成果报告</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --container-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --glow-success: 0 0 20px rgba(16, 185, 129, 0.3);
+            --glow-warning: 0 0 20px rgba(245, 158, 11, 0.3);
+            --glow-danger: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #60a5fa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --glow-success: 0 0 30px rgba(52, 211, 153, 0.4);
+            --glow-warning: 0 0 30px rgba(251, 191, 36, 0.4);
+            --glow-danger: 0 0 30px rgba(248, 113, 113, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transition: background-color 0.3s;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+            margin-top: 35px;
+            margin-bottom: 18px;
+        }
+
+        .theme-btn {
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .score-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--container-bg) 0%, var(--bg-color) 100%);
+        }
+
+        .score-circle {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin-bottom: 20px;
+        }
+
+        .score-circle svg {
+            transform: rotate(-90deg);
+            width: 140px;
+            height: 140px;
+        }
+
+        .score-circle .bg {
+            fill: none;
+            stroke: var(--border-color);
+            stroke-width: 10;
+        }
+
+        .score-circle .progress {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 408;
+            stroke-dashoffset: 408;
+            transition: stroke-dashoffset 1.5s ease-out, stroke 0.3s;
+        }
+
+        .score-circle .progress.animate {
+            stroke-dashoffset: var(--offset);
+        }
+
+        .score-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 42px;
+            font-weight: 900;
+        }
+
+        .score-high .progress { stroke: var(--success); }
+        .score-high .score-value { color: var(--success); }
+        .score-high { box-shadow: var(--glow-success); }
+
+        .score-med .progress { stroke: var(--warning); }
+        .score-med .score-value { color: var(--warning); }
+        .score-med { box-shadow: var(--glow-warning); }
+
+        .score-low .progress { stroke: var(--danger); }
+        .score-low .score-value { color: var(--danger); }
+        .score-low { box-shadow: var(--glow-danger); }
+
+        .score-label {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .score-desc {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .info-table th, .info-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            width: 35%;
+            background-color: var(--bg-color);
+        }
+
+        .info-table tr:hover td {
+            background-color: var(--bg-color);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { background-color: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-warning { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-danger { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .badge-info { background-color: rgba(59, 130, 246, 0.15); color: var(--primary); }
+
+        .list-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-group-item {
+            padding: 16px 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .list-group-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .issue-text {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .issue-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .ports-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .port-tag {
+            background: linear-gradient(135deg, var(--bg-color), var(--container-bg));
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            transition: transform 0.2s;
+        }
+
+        .port-tag:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .print-btn {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        @media print {
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; padding: 20px; }
+            .theme-btn, .print-btn { display: none; }
+            .list-group-item:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>SecOps 安全加固成果报告</h1>
+                <p style="color: var(--text-muted); margin: 8px 0 0 0; font-size: 14px;">
+                    生成时间: {{ timestamp }}
+                </p>
+            </div>
+            <div>
+                <button class="theme-btn" onclick="toggleTheme()">切换主题</button>
+                <button class="print-btn" onclick="window.print()">打印报告</button>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="score-card {{ score_class }}">
+                <div class="score-circle">
+                    <svg viewBox="0 0 140 140">
+                        <circle class="bg" cx="70" cy="70" r="65"></circle>
+                        <circle class="progress" cx="70" cy="70" r="65" style="--offset: {{ (1 - score / 100) * 408 }};"></circle>
+                    </svg>
+                    <div class="score-value" id="scoreNum">0</div>
+                </div>
+                <div class="score-label">综合安全评分</div>
+                <div class="score-desc">基于安全配置基线自动计算</div>
+            </div>
+
+            <div>
+                <h2>服务器基础负载信息</h2>
+                <table class="info-table">
+                    <tr>
+                        <th>主机名称</th>
+                        <td>{{ load.hostname }}</td>
+                    </tr>
+                    <tr>
+                        <th>操作系统</th>
+                        <td>{{ load.os_type }} ({{ load.os_release }})</td>
+                    </tr>
+                    <tr>
+                        <th>CPU核心数</th>
+                        <td>{{ load.cpu_cores }} 核</td>
+                    </tr>
+                    <tr>
+                        <th>内存使用状态</th>
+                        <td>{{ load.memory_total }} (使用率: {{ load.memory_used_percent }})</td>
+                    </tr>
+                    <tr>
+                        <th>主分区磁盘状态</th>
+                        <td>{{ load.disk_total }} (使用率: {{ load.disk_used_percent }})</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <h2>系统安全加固基线比对</h2>
+        <table class="info-table" style="margin-bottom: 30px;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border-color);">
+                    <th style="width: 30%;">检查项</th>
+                    <th style="width: 25%;">目标基线标准</th>
+                    <th style="width: 25%;">当前系统状态</th>
+                    <th style="width: 20%;">结论</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not is_windows %}
+                <tr>
+                    <td>SSH Root直接登录</td>
+                    <td>禁止登录 (no)</td>
+                    <td>{{ ssh.permit_root_login }}</td>
+                    <td>
+                        <span class="status-badge {% if ssh.permit_root_login == 'no' %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if ssh.permit_root_login == 'no' %}符合{% else %}不符合{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>SSH 密码认证方式</td>
+                    <td>禁用密码，仅用密钥 (no)</td>
+                    <td>{{ ssh.password_authentication }}</td>
+                    <td>
+                        <span class="status-badge {% if ssh.password_authentication == 'no' %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if ssh.password_authentication == 'no' %}符合{% else %}不符合{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>SSH 服务端口</td>
+                    <td>非常规端口 (非 22)</td>
+                    <td>{{ ssh.ssh_port }}</td>
+                    <td>
+                        <span class="status-badge {% if ssh.ssh_port != '22' and ssh.ssh_port != '未知' %}badge-success{% else %}badge-warning{% endif %}">
+                            {% if ssh.ssh_port != '22' and ssh.ssh_port != '未知' %}符合{% else %}不符合 (默认){% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>特权账号检测</td>
+                    <td>仅存在 root (UID=0)</td>
+                    <td>存在特权数: {{ accounts.uid_zero_users|length }}</td>
+                    <td>
+                        <span class="status-badge {% if accounts.uid_zero_users|length == 1 %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if accounts.uid_zero_users|length == 1 %}安全{% else %}有隐患{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>nftables 防火墙</td>
+                    <td>已安装并启动运行</td>
+                    <td>{% if services.nftables.active %}运行中{% else %}未启动{% endif %}</td>
+                    <td>
+                        <span class="status-badge {% if services.nftables.active %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if services.nftables.active %}已启用{% else %}未启用{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>fail2ban 防暴力破解</td>
+                    <td>已安装并启动运行</td>
+                    <td>{% if services.fail2ban.active %}运行中{% else %}未启动{% endif %}</td>
+                    <td>
+                        <span class="status-badge {% if services.fail2ban.active %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if services.fail2ban.active %}已启用{% else %}未启用{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>auditd 系统调用审计</td>
+                    <td>已安装并启动运行</td>
+                    <td>{% if services.auditd.active %}运行中{% else %}未启动{% endif %}</td>
+                    <td>
+                        <span class="status-badge {% if services.auditd.active %}badge-success{% else %}badge-warning{% endif %}">
+                            {% if services.auditd.active %}已启用{% else %}未启用{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>Windows 本地防火墙</td>
+                    <td>已开启 (ON)</td>
+                    <td>{{ services.windows_firewall }}</td>
+                    <td>
+                        <span class="status-badge {% if services.windows_firewall == 'active' %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if services.windows_firewall == 'active' %}开启{% else %}关闭{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Windows 安全特权状态</td>
+                    <td>以管理员身份执行体检</td>
+                    <td>是</td>
+                    <td><span class="status-badge badge-success">正常</span></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <h2>对外开放端口</h2>
+        <div class="ports-container" style="margin-bottom: 30px;">
+            {% for port in ports %}
+            <div class="port-tag">{{ port }}</div>
+            {% else %}
+            <div style="color: var(--text-muted);">未检测到活动监听端口</div>
+            {% endfor %}
+        </div>
+
+        <h2>系统优化建议清单</h2>
+        <ul class="list-group">
+            {% if score == 100 %}
+            <li class="list-group-item" style="border-color: var(--success);">
+                <div>
+                    <div class="issue-text" style="color: var(--success);">系统已达标安全基线标准</div>
+                    <div class="issue-desc">当前服务器配置表现良好，未发现必须的加固动作。</div>
+                </div>
+                <span class="status-badge badge-success">PASS</span>
+            </li>
+            {% else %}
+                {% if not is_windows %}
+                    {% if ssh.permit_root_login == 'yes' %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">SSH 允许 root 直接登录</div>
+                            <div class="issue-desc">黑客可通过暴力破解直接获取 root 控制权。建议禁用 root 直接登录。</div>
+                        </div>
+                        <span class="status-badge badge-danger">高危</span>
+                    </li>
+                    {% endif %}
+                    {% if ssh.password_authentication == 'yes' %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">SSH 允许密码认证</div>
+                            <div class="issue-desc">仅采用密码认证易受字典暴破。建议禁用密码登录，改用 RSA/Ed25519 证书密钥。</div>
+                        </div>
+                        <span class="status-badge badge-danger">高危</span>
+                    </li>
+                    {% endif %}
+                    {% if ssh.ssh_port == '22' %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">SSH 监听在默认端口 22</div>
+                            <div class="issue-desc">默认端口会遭受公网大量的自动化脚本碰撞。建议修改为非常规的高端口（例如 22222）。</div>
+                        </div>
+                        <span class="status-badge badge-warning">中危</span>
+                    </li>
+                    {% endif %}
+                    {% if not services.nftables.active %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">nftables 主机防火墙未启动</div>
+                            <div class="issue-desc">缺少端口级访问控制。建议启用并配置 nftables 并关闭外部不需要的暴露端口。</div>
+                        </div>
+                        <span class="status-badge badge-danger">高危</span>
+                    </li>
+                    {% endif %}
+                    {% if not services.fail2ban.active %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">fail2ban 爆破防护服务未运行</div>
+                            <div class="issue-desc">无法拦截连续尝试暴力破解的恶意 IP。建议安装并配置 fail2ban 对 sshd 实施防护。</div>
+                        </div>
+                        <span class="status-badge badge-warning">中危</span>
+                    </li>
+                    {% endif %}
+                    {% if not services.auditd.active %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">auditd 审计进程未启用</div>
+                            <div class="issue-desc">系统关键配置文件（如 passwd/shadow）遭非法篡改时无法留下审计审计日志。建议开启 auditd 审计。</div>
+                        </div>
+                        <span class="status-badge badge-info">低危</span>
+                    </li>
+                    {% endif %}
+                {% else %}
+                    {% if services.windows_firewall != 'active' %}
+                    <li class="list-group-item">
+                        <div>
+                            <div class="issue-text">Windows Defender 防火墙已关闭</div>
+                            <div class="issue-desc">外部连接能直接尝试攻击本地服务。建议开启防火墙的所有网络配置文件。</div>
+                        </div>
+                        <span class="status-badge badge-danger">高危</span>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </ul>
+
+        <footer>
+            <p>SecOps 自动化安全运维工具箱 v2.1.0 | 报告生成于 {{ timestamp }}</p>
+            <p style="margin-top: 8px;">Securing your infrastructure, one scan at a time.</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        // Score counter animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const scoreEl = document.getElementById('scoreNum');
+            const targetScore = {{ score }};
+            const duration = 1500;
+            const startTime = performance.now();
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(targetScore * easeOut);
+                scoreEl.textContent = current;
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            requestAnimationFrame(animate);
+
+            // Animate progress circle
+            setTimeout(function() {
+                document.querySelector('.progress').classList.add('animate');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

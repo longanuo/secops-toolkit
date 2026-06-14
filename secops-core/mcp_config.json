@@ -1,0 +1,53 @@
+{
+  "server": {
+    "name": "cybersecurity-ops",
+    "version": "2.1.0",
+    "description": "Cybersecurity operations toolbox MCP server"
+  },
+  "transport": {
+    "type": "stdio",
+    "command": "secops-mcp",
+    "args": []
+  },
+  "tools": {
+    "solve_ctf_challenge": {
+      "enabled": true,
+      "timeout_seconds": 300
+    },
+    "scan_vulnerabilities": {
+      "enabled": true,
+      "timeout_seconds": 600
+    },
+    "server_health_check": {
+      "enabled": true,
+      "timeout_seconds": 120
+    },
+    "sandbox_test": {
+      "enabled": true,
+      "timeout_seconds": 900
+    },
+    "learn_from_github": {
+      "enabled": true,
+      "timeout_seconds": 300
+    },
+    "update_firewall": {
+      "enabled": true,
+      "timeout_seconds": 120
+    },
+    "run_hardening": {
+      "enabled": true,
+      "timeout_seconds": 180
+    }
+  },
+  "security": {
+    "require_authorization": true,
+    "allowed_targets": ["localhost", "localhost:*", "127.0.0.1", "127.0.0.1:*", "192.168.*", "10.*"],
+    "blocked_targets": ["*.gov", "*.mil", "*.edu"]
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "mcp_server.log",
+    "max_size_mb": 10,
+    "backup_count": 5
+  }
+}
