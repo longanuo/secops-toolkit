@@ -109,7 +109,7 @@ def active_fuzz_url(url):
                 t0 = time.time()
                 requests.get(base_url, headers=headers, timeout=5, verify=False, proxies=utils.get_proxies())
                 baseline_times.append(time.time() - t0)
-            except:
+            except Exception:
                 pass
             time.sleep(delay_between_requests)
             
@@ -130,7 +130,7 @@ def active_fuzz_url(url):
                     print(f"      - 验证链接: {test_url}")
                     vuln_found = True
                     break
-            except:
+            except Exception:
                 pass
                 
         # 2. 投递 SQL 注入 Payload (寻找报错特征)
@@ -155,7 +155,7 @@ def active_fuzz_url(url):
                         break
                 if vuln_found:
                     break
-            except:
+            except Exception:
                 pass
                 
         # 3. 时间盲注探测 (均值差分研判)
@@ -186,7 +186,7 @@ def active_fuzz_url(url):
                         print(f"      - 验证链接: {test_url}")
                         vuln_found = True
                         break
-            except:
+            except Exception:
                 pass
                 
     if not vuln_found:

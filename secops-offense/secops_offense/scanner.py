@@ -34,7 +34,7 @@ def run_nuclei_scan(target_url):
                             "severity": info.get("severity", "high"),
                             "host": data.get("host", target_url)
                         })
-        except:
+        except Exception:
             pass
         os.remove(out_file)
         

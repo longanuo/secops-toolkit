@@ -19,7 +19,7 @@ def get_webhook_url():
             with open(conf_file, "r", encoding="utf-8") as f:
                 config = json.load(f)
                 return config.get("webhook_url")
-        except:
+        except Exception:
             pass
     return None
 

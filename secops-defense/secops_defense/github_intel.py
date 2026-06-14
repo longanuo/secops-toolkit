@@ -44,7 +44,7 @@ def fetch_payloads(owner, repo, path):
         response = requests.get(url, timeout=15)
         if response.status_code == 200:
             return response.text.splitlines()
-    except:
+    except Exception:
         pass
     return []
 

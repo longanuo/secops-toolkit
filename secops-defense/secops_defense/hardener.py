@@ -99,7 +99,7 @@ def harden_ssh():
                 with open(config_path, "w") as f:
                     with open(backup_path, "r", errors="ignore") as src:
                         f.write(src.read())
-            except:
+            except Exception:
                 pass
         return False, f"修改 SSH 配置文件出错: {str(e)}，已尝试自动回滚"
 

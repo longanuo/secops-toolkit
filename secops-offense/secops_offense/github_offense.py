@@ -128,7 +128,7 @@ def _load_meta():
         try:
             with open(CACHE_META, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except:
+        except Exception:
             pass
     return {}
 
