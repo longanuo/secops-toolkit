@@ -10,17 +10,22 @@
 > 未经事先双方同意，使用本工具对任何目标进行攻击测试均属于非法行为。开发者及贡献者不对任何人因滥用本项目引发的任何直接或间接后果承担任何法律及连带责任。请务必在当地法律和相关网络安全法规的允许范围内合法使用。
 ## 架构
 
-```
-cybersecurity-ops/
-├── secops-core/          # 共享内核 (配置/日志/HTTP/GitHub客户端)
-├── secops-offense/       # 渗透测试 (漏洞验证/弹药库/GitHub学习)
-├── secops-defense/       # 系统维护 (体检/加固/防火墙/巡检)
-├── secops-cli/           # 统一 CLI 入口
-├── hermes-skills/        # Agent 技能定义
-├── visual-lab/           # Electron GUI 界面
-├── Dockerfile            # Docker 容器化
-├── docker-compose.yml    # Docker Compose 编排
-└── Makefile              # 快捷命令
+```mermaid
+graph TD
+    CLI[secops-cli / secopsctl] --> Core[secops-core]
+    CLI --> Offense[secops-offense]
+    CLI --> Defense[secops-defense]
+    
+    Offense --> AttackEngine[漏洞验证引擎]
+    Offense --> Arsenal[攻击弹药库]
+    
+    Defense --> Evaluator[系统安全体检]
+    Defense --> Firewall[智能防火墙 / WAF]
+    Defense --> AI_Tuning[AI 调优与规则生成]
+    Defense --> Anomaly[异常行为检测]
+    
+    GUI[visual-lab] -.-> CLI
+    Skills[hermes-skills] -.-> Core
 ```
 
 ## 安装
@@ -153,21 +158,17 @@ make docker-scan
 make docker-down
 ```
 
-## 快速开始
+## 快速开始 (Deploy Demo Tenant)
 
 ```bash
-# 1. 安装
+# 1. 初始化项目与依赖 (一键安装)
 pip install -e .
 
-# 2. 安全体检
-secops --check
+# 2. 生成租户配置模板
+secopsctl init --demo > tenant-demo.yaml
 
-# 3. 漏洞扫描
-secops --attack http://your-target.com
-
-# 4. 查看报告
-secops --check
-# 然后选择 [10] 生成报告
+# 3. 部署租户防御体系与检测计划
+secopsctl deploy tenant-demo.yaml
 ```
 
 ## 参考文档 (References)

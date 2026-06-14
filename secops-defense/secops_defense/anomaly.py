@@ -4,16 +4,29 @@ import re
 from datetime import datetime, timedelta
 from typing import List, Dict
 from secops_core import utils
+from secops_defense.ai_tuning import AITuningModule
 
+# Initialize AI tuner singleton
+_ai_tuner = AITuningModule()
 
-def check_failed_logins(log_file: str = "/var/log/auth.log", threshold: int = 10, hours: int = 24) -> List[Dict]:
+def report_anomaly_feedback(rule_id: str, is_false_positive: bool):
+    """
+    User/System feedback loop to mark anomalies as false positive or true positive.
+    """
+    _ai_tuner.report_feedback(rule_id, is_false_positive)
+    print(f"[*] Feedback submitted for rule '{rule_id}' (FP: {is_false_positive})")
+
+def check_failed_logins(log_file: str = "/var/log/auth.log", default_threshold: int = 10, hours: int = 24) -> List[Dict]:
     """
     检测暴力破解登录尝试
     :param log_file: 认证日志文件路径
-    :param threshold: 触发告警的失败次数阈值
+    :param default_threshold: 默认触发告警的失败次数阈值
     :param hours: 检查最近 N 小时
     :return: 异常登录列表
     """
+    # Use AI tuning to adjust threshold dynamically
+    threshold = _ai_tuner.tune_threshold("brute_force_login", default_threshold)
+    print(f"[*] AI tuned brute_force threshold from {default_threshold} -> {threshold}")
     if utils.is_windows():
         # Windows: 检查安全事件日志
         rc, stdout, stderr = utils.run_cmd("wevtutil qe Security /q:\"*[System[EventID=4625]]\" /c:100 /f:text", shell=True)

@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 secops = "secops_cli.main:main"
+secopsctl = "secops_cli.secopsctl:main"
 
 [tool.setuptools.packages.find]
 include = ["secops_cli*"]

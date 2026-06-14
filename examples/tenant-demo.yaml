@@ -1,0 +1,37 @@
+tenant_name: demo-corp
+environment: staging
+cloud_provider: gcp
+
+# 目标配置
+targets:
+  - url: https://staging.demo-corp.internal
+    ip: 10.0.1.50
+    tags: [web, frontend]
+
+# 防御模块配置
+defense:
+  firewall:
+    enabled: true
+    mode: auto-block
+    threat_intel_feeds:
+      - ipsum
+      - firehol
+  ai_tuning:
+    enabled: true
+    sensitivity: medium
+    auto_generate_rules: true
+
+# 渗透模块配置
+offense:
+  auto_scan:
+    enabled: true
+    schedule: "0 2 * * *" # 每天凌晨2点
+    modules:
+      - xss
+      - sqli
+      - ssrf
+
+# 通知与反馈
+notifications:
+  slack_webhook: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+  email: "security@demo-corp.com"
