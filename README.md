@@ -1,6 +1,6 @@
-# SecOps 自动化安全运维工具箱 v3.0.0
+# SecOps 自动化安全运维工具箱
 
-> 渗透测试 + 系统维护 + 智能防御 + 漏洞检测
+> 渗透测试 + 系统维护 + 智能防御 + 漏洞检测 + AI 调优
 
 > [!WARNING]
 > **免责声明 (Disclaimer)**
@@ -69,6 +69,12 @@ secops --intel                          # 威胁情报摘要
 
 # 定时任务
 secops --cron-check                     # 执行定时巡检
+
+# 租户配置管理 (secopsctl)
+secopsctl init --demo                   # 生成租户配置模板
+secopsctl validate tenant.yaml          # 校验配置文件
+secopsctl deploy tenant.yaml            # 部署租户防御体系
+secopsctl bootstrap gcp                 # 引导 GCP 云环境
 ```
 
 ### Python 库调用
@@ -77,7 +83,7 @@ secops --cron-check                     # 执行定时巡检
 from secops_offense.attack_engine import AttackEngine
 engine = AttackEngine("https://target.com")
 engine.authorize()
-engine.run_all(modules=["xss", "sqli", "ssrf", "xxe", "rce", "nosqli", "jwt", "idor", "cors", "redirect"])
+engine.run_all(modules=["xss", "sqli", "ssrf", "xxe", "rce", "nosqli", "jwt", "idor", "cors", "redirect", "crlf", "ldap"])
 engine.report()
 
 # WAF 检测
@@ -96,16 +102,29 @@ anomalies = run_anomaly_detection()
 # 威胁情报
 from secops_defense.threat_intel import get_threat_summary
 summary = get_threat_summary()
+
+# Rootkit 检测
+from secops_defense.rootkit_check import run_rootkit_check
+issues = run_rootkit_check()
+
+# TLS 审计
+from secops_defense.tls_audit import audit_tls
+result = audit_tls("example.com")
+
+# AI 调优
+from secops_defense.ai_tuning import AITuningModule
+tuner = AITuningModule(base_sensitivity=60)
+thresholds = tuner.get_thresholds("xss")
 ```
 
 ## 子项目说明
 
 | 子项目 | 职责 | 核心模块 |
 |--------|------|---------|
-| secops-core | 共享内核 | config, logger, utils, http_client, github_client |
-| secops-offense | 渗透测试 | attack_engine (17种检测器), arsenal, github_offense |
-| secops-defense | 系统维护 | evaluator, hardener, firewall, cron, reporter, waf, anomaly, threat_intel |
-| secops-cli | 统一入口 | main (路由到 offense/defense) |
+| secops-core | 共享内核 | config, logger, utils, http_client, github_client, dispatcher, task, result, mcp_server, agent_state_machine, proxy_pool, traffic_jitter, log_sync |
+| secops-offense | 渗透测试 | attack_engine (17种检测器), arsenal, github_offense, online_scanner, kali_builder, guide |
+| secops-defense | 系统维护 | evaluator, hardener, firewall, cron, reporter, waf, anomaly, threat_intel, ai_tuning, rule_generator, remediation, rootkit_check, tls_audit |
+| secops-cli | 统一入口 | main (交互菜单), secopsctl (租户配置部署) |
 
 ## 支持的漏洞类型 (17种)
 
@@ -126,6 +145,10 @@ summary = get_threat_summary()
 | IDOR | 不安全的直接对象引用 | high |
 | CORS | 跨域资源共享漏洞 | medium/high |
 | Open Redirect | 开放重定向 | medium |
+| CRLF | HTTP 头注入 / 响应拆分 | high |
+| Deserialization | Java/PHP/Python 反序列化漏洞 | critical |
+| LDAP | LDAP 注入 | critical |
+| Subdomain Takeover | 子域名接管 (S3/Heroku/GitHub Pages 等) | high |
 
 ### 防御模块
 
@@ -134,6 +157,11 @@ summary = get_threat_summary()
 | WAF 检测 | 17种国内外 WAF 指纹识别 + 绕过测试 |
 | 异常检测 | 暴力破解/可疑进程/未授权密钥 |
 | 威胁情报 | 6源聚合 + 信誉评分 + 本地缓存 |
+| AI 调优 | 基于误报反馈自动调整检测灵敏度 |
+| 规则生成 | 自动生成 nftables / WAF / YARA 规则 |
+| 攻防联动 | 攻击发现 → 自动生成防御规则 (remediation) |
+| Rootkit 检测 | SUID/SGID 异常、隐藏进程、内核模块审计 |
+| TLS 审计 | 证书过期检测、弱密码套件识别、协议降级检查 |
 
 ## 防火墙功能
 
@@ -190,7 +218,15 @@ secops-core/
     ├── logger.py          # 统一日志
     ├── utils.py           # 基础工具
     ├── http_client.py     # HTTP 封装
-    └── github_client.py   # GitHub 拉取
+    ├── github_client.py   # GitHub 拉取
+    ├── dispatcher.py      # 任务调度器
+    ├── task.py            # 任务类型定义
+    ├── result.py          # 统一结果结构
+    ├── mcp_server.py      # MCP 协议服务器
+    ├── agent_state_machine.py  # Agent 状态机
+    ├── proxy_pool.py      # 代理池管理
+    ├── traffic_jitter.py  # 流量抖动
+    └── log_sync.py        # 日志同步
 
 secops-offense/
 └── secops_offense/
@@ -211,9 +247,15 @@ secops-offense/
     │       ├── jwt.py     # JWT 漏洞
     │       ├── idor.py    # IDOR 漏洞
     │       ├── cors.py    # CORS 漏洞
-    │       └── redirect.py # 开放重定向
+    │       ├── redirect.py # 开放重定向
+    │       ├── crlf.py    # CRLF 注入
+    │       ├── deserialization.py # 反序列化
+    │       ├── ldap.py    # LDAP 注入
+    │       └── subdomain_takeover.py # 子域名接管
     ├── arsenal.py         # 弹药库
     ├── github_offense.py  # GitHub payload 学习
+    ├── kali_builder.py    # Kali 命令生成
+    ├── guide.py           # 挖洞思路指引
     └── online_scanner.py  # 在线扫描
 
 secops-defense/
@@ -221,18 +263,24 @@ secops-defense/
     ├── evaluator.py       # 系统安全体检
     ├── hardener.py        # 一键加固
     ├── firewall.py        # 防火墙管理
-    ├── github_intel.py    # 威胁情报
-    ├── cron.py            # 定时巡检
-    ├── reporter.py        # 运维报告
     ├── waf.py             # WAF 检测与绕过
     ├── anomaly.py         # 异常行为检测
     ├── threat_intel.py    # 威胁情报聚合
+    ├── ai_tuning.py       # AI 检测调优
+    ├── rule_generator.py  # 自动生成防御规则
+    ├── remediation.py     # 攻防联动 (攻击→防御)
+    ├── rootkit_check.py   # Rootkit/后门检测
+    ├── tls_audit.py       # TLS 证书审计
+    ├── github_intel.py    # GitHub 威胁情报
+    ├── cron.py            # 定时巡检
+    ├── reporter.py        # 运维报告
     ├── templates/         # 报告模板
     └── scripts/           # 运维脚本
 
 secops-cli/
 └── secops_cli/
-    └── main.py            # 统一入口 + 菜单路由
+    ├── main.py            # 交互式菜单 + secops 入口
+    └── secopsctl.py       # 租户配置管理 CLI
 ```
 
 ## 测试
