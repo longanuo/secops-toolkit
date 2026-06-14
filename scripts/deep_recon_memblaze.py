@@ -185,7 +185,7 @@ for param in redirect_params:
             print(f"  [!] Open Redirect via {param}: {loc}")
         elif r.status_code in (301, 302, 303, 307, 308):
             print(f"  Redirect {r.status_code} via {param}: {loc}")
-    except:
+    except Exception:
         pass
 
 # 10. 检查 PHP 版本信息

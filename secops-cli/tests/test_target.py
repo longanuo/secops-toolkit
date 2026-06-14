@@ -196,7 +196,7 @@ def test_common_vulnerabilities():
                     print(f"  [!] 潜在SQL注入: {payload[:30]}...")
                     findings.append({"type": "sqli", "payload": payload})
                     break
-        except:
+        except Exception:
             pass
         time.sleep(0.3)
     
@@ -213,7 +213,7 @@ def test_common_vulnerabilities():
             if payload in resp.text:
                 print(f"  [!] 潜在XSS: {payload[:30]}...")
                 findings.append({"type": "xss", "payload": payload})
-        except:
+        except Exception:
             pass
         time.sleep(0.3)
     

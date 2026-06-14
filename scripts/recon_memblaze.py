@@ -51,7 +51,7 @@ for p in paths:
         r = requests.get(f"{BASE}{p}", headers=headers, timeout=8, verify=False, allow_redirects=False)
         if r.status_code != 404:
             print(f"  {r.status_code} {p} ({len(r.content)} bytes)")
-    except:
+    except Exception:
         pass
 
 # 4. HTTP 方法检查

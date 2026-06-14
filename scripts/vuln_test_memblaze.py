@@ -47,7 +47,7 @@ for page in test_pages:
             inputs = re.findall(r'<input[^>]*name=["\']([^"\']*)["\'][^>]*>', r.text, re.IGNORECASE)
             if forms or inputs:
                 print(f"  {page}: forms={forms}, inputs={inputs}")
-    except:
+    except Exception:
         pass
 
 # 3. 登录页面暴力破解防护测试
@@ -123,7 +123,7 @@ for payload in lfi_payloads:
                 if "root:" in line or "[fonts]" in line:
                     print(f"      {line.strip()}")
         time.sleep(0.2)
-    except:
+    except Exception:
         pass
 
 # 5. SSRF 测试
@@ -143,7 +143,7 @@ for payload in ssrf_payloads:
         if "ami-id" in r.text or "instance-id" in r.text:
             print(f"  [!] SSRF: {payload}")
         time.sleep(0.2)
-    except:
+    except Exception:
         pass
 
 # 6. 命令注入测试
@@ -163,7 +163,7 @@ for payload in rce_payloads:
         if "root:" in r.text or "www-data" in r.text or "uid=" in r.text:
             print(f"  [!] RCE: {payload}")
         time.sleep(0.2)
-    except:
+    except Exception:
         pass
 
 # 7. XXE 测试 (通过搜索)
@@ -221,7 +221,7 @@ try:
             api_endpoints = re.findall(r'["\']/(api|auth|admin|login)[^"\']*["\']', r2.text)
             if api_endpoints:
                 print(f"  API endpoints in {js}: {api_endpoints[:5]}")
-        except:
+        except Exception:
             pass
 except Exception as e:
     print(f"  Error: {e}")
